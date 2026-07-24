@@ -16,9 +16,9 @@ def test_validate_raw_accepts_valid_frame(raw_domain_df: pl.DataFrame) -> None:
 
 def test_validate_raw_rejects_out_of_range_polarity() -> None:
     """Polaridade fora de {0, 1} viola o contrato bruto."""
-    df = pl.DataFrame({"review_text": ["x"], "polarity": [2.0], "rating": [5.0]})
+    polarity_df = pl.DataFrame({"review_text": ["x"], "polarity": [2.0], "rating": [5.0]})
     with pytest.raises(DataValidationError):
-        validate_raw(df)
+        validate_raw(polarity_df)
 
 
 def _valid_processed() -> pl.DataFrame:
@@ -41,13 +41,13 @@ def test_validate_processed_accepts_valid_frame() -> None:
 
 def test_validate_processed_rejects_empty_text() -> None:
     """Texto limpo vazio viola o contrato processado."""
-    df = _valid_processed().with_columns(pl.lit("").alias("text_clean"))
+    processed_df = _valid_processed().with_columns(pl.lit("").alias("text_clean"))
     with pytest.raises(DataValidationError):
-        validate_processed(df)
+        validate_processed(processed_df)
 
 
 def test_validate_processed_rejects_unknown_domain() -> None:
     """Um domínio fora do catálogo viola o contrato processado."""
-    df = _valid_processed().with_columns(pl.lit("desconhecido").alias("dataset"))
+    processed_df = _valid_processed().with_columns(pl.lit("desconhecido").alias("dataset"))
     with pytest.raises(DataValidationError):
-        validate_processed(df)
+        validate_processed(processed_df)

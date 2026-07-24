@@ -40,8 +40,8 @@ def _require_transformers() -> tuple[Any, Any]:
         Se o extra ``bert`` (torch/transformers) não estiver instalado.
     """
     try:
-        import torch  # noqa: PLC0415  # pyright: ignore[reportMissingImports]
-        import transformers  # noqa: PLC0415  # pyright: ignore[reportMissingImports]
+        import torch  # pyright: ignore[reportMissingImports]
+        import transformers  # pyright: ignore[reportMissingImports]
     except ImportError as exc:  # dependência opcional ausente
         raise MissingDependencyError(
             "O BERTimbau requer o extra 'bert'. Instale com: uv sync --extra bert"
@@ -60,7 +60,7 @@ class _TextDataset:
         return len(self.encodings["input_ids"])
 
     def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
-        import torch  # noqa: PLC0415  # pyright: ignore[reportMissingImports]
+        import torch  # pyright: ignore[reportMissingImports]
 
         item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
         if self.labels is not None:
