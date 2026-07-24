@@ -1,0 +1,64 @@
+# =============================================================================
+# mkdocs.yml — documentação com MkDocs Material + mkdocstrings.
+# A referência da API é gerada a partir das docstrings NumPy (pt-BR).
+# Servir localmente:  uv run mkdocs serve
+# Publicar:           uv run mkdocs gh-deploy --force
+# =============================================================================
+
+site_name: Benchmark de Sentimento PT-BR
+site_description: TF-IDF + Regressão Logística vs. BERTimbau, com avaliação cross-dataset.
+docs_dir: docs
+
+theme:
+  name: material
+  language: pt-BR
+  palette:
+    - scheme: default
+      primary: teal
+      toggle:
+        icon: material/weather-night
+        name: Modo escuro
+    - scheme: slate
+      primary: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Modo claro
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search:
+      lang: pt
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Início: index.md
+  - Guias:
+      - Setup: guides/setup.md
+      - Uso: guides/usage.md
+      - Arquitetura: guides/architecture.md
+  - Referência da API: reference.md
