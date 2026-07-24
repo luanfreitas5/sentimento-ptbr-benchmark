@@ -1,0 +1,43 @@
+# =============================================================================
+# model_params.yaml — hiperparâmetros dos modelos do benchmark.
+# Validado por src/config/settings.py (Pydantic).
+# =============================================================================
+
+# --- Baseline clássico: TF-IDF + Regressão Logística -------------------------
+tfidf_logreg:
+  tfidf:
+    ngram_range: [1, 2]       # unigramas + bigramas
+    min_df: 5                 # ignora termos muito raros
+    max_df: 0.9               # ignora termos quase onipresentes
+    max_features: 50000
+    sublinear_tf: true        # 1 + log(tf)
+    strip_accents: null       # pré-processamento controlado em src/preprocessing/text.py
+  logreg:
+    C: 1.0
+    max_iter: 1000
+    class_weight: balanced    # corpora têm forte viés para a classe positiva
+    solver: liblinear
+
+# --- Transformer: fine-tuning do BERTimbau -----------------------------------
+# Requer o extra `bert` (torch/transformers/accelerate/datasets).
+bertimbau:
+  pretrained_model: neuralmind/bert-base-portuguese-cased
+  max_length: 128
+  num_labels: 2
+  training:
+    epochs: 2
+    batch_size: 32
+    eval_batch_size: 64
+    learning_rate: 2.0e-5
+    weight_decay: 0.01
+    warmup_ratio: 0.1
+    fp16: true                # usa mixed precision se houver GPU
+    gradient_accumulation_steps: 1
+    logging_steps: 50
+    early_stopping_patience: 2
+
+# --- Avaliação ---------------------------------------------------------------
+evaluation:
+  primary_metric: f1_macro    # classes desbalanceadas -> F1-macro é o headline
+  bootstrap_samples: 1000     # IC 95% por reamostragem
+  confidence_level: 0.95

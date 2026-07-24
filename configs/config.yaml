@@ -1,0 +1,34 @@
+# =============================================================================
+# config.yaml — configurações gerais do projeto.
+# Validado em runtime por src/config/settings.py (Pydantic).
+# =============================================================================
+
+project_name: sentimento-ptbr-benchmark
+random_seed: 42
+
+# Corpora rotulados de sentimento em PT-BR (Kaggle: ptbr-sentiment-analysis-datasets).
+# São os domínios usados na avaliação cross-dataset (treina em um, testa em outro).
+datasets:
+  - b2w         # e-commerce (Americanas/B2W)
+  - buscape     # comparador de preços
+  - olist       # marketplace (Olist)
+  - utlc_apps   # avaliações de apps
+  - utlc_movies # avaliações de filmes
+
+# Tarefa: classificação binária de polaridade (0 = negativo, 1 = positivo).
+target: polarity
+text_column: review_text
+
+# Amostragem — os corpora somam milhões de linhas; para viabilizar o benchmark
+# (sobretudo o fine-tuning do BERTimbau) amostramos de forma estratificada.
+# Defina sample_size: null para usar o corpus inteiro.
+sampling:
+  sample_size: 20000        # nº de exemplos por domínio após amostragem
+  stratify_by: polarity     # mantém a proporção de classes
+  min_chars: 3              # descarta textos triviais
+
+# Divisão treino/teste dentro de cada domínio (o teste é usado tanto in-domain
+# quanto como alvo cross-domain).
+split:
+  test_size: 0.2
+  stratify: true

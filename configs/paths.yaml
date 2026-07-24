@@ -1,0 +1,20 @@
+# =============================================================================
+# paths.yaml — caminhos de dados, modelos e saídas (relativos à raiz do projeto).
+# Resolvidos para pathlib.Path em src/config/paths.py.
+# =============================================================================
+
+data:
+  raw: data/raw               # corpora originais (.csv) — nunca modificar
+  interim: data/interim       # dados intermediários (limpos)
+  processed: data/processed   # splits prontos para modelagem (.parquet)
+
+models: models                # modelos treinados por domínio
+reports:
+  root: reports
+  figures: reports/figures
+  metrics: reports/metrics
+  model_cards: reports/model_cards
+  datasheets: reports/datasheets
+
+logs: logs
+mlruns: mlruns                # backend store local do MLflow
