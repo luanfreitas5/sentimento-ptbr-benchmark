@@ -46,8 +46,8 @@ def seed_everything(seed: int = RANDOM_SEED, *, deterministic_torch: bool = Fals
     rng.normal()
 
     with suppress(ImportError):  # opcional: só se o extra `bert` (torch) estiver instalado.
-        import torch  # pyright: ignore[reportMissingImports]
-        from transformers import set_seed  # pyright: ignore[reportMissingImports]
+        import torch  # pyright: ignore[reportMissingImports]  # noqa: PLC0415
+        from transformers import set_seed  # pyright: ignore[reportMissingImports]  # noqa: PLC0415
 
         set_seed(seed)
         torch.manual_seed(seed)
