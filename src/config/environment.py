@@ -45,14 +45,11 @@ def seed_everything(seed: int = RANDOM_SEED, *, deterministic_torch: bool = Fals
     rng = np.random.default_rng(seed=123)
     rng.normal()
 
-    with suppress(ImportError):  # opcional: só se o extra `bert` (transformers) estiver instalado.
+    with suppress(ImportError):  # opcional: só se o extra `bert` (torch) estiver instalado.
+        import torch  # pyright: ignore[reportMissingImports]
         from transformers import set_seed  # pyright: ignore[reportMissingImports]
 
         set_seed(seed)
-
-    with suppress(ImportError):  # opcional: só se o extra `bert` (torch) estiver instalado.
-        import torch  # pyright: ignore[reportMissingImports]
-
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         if deterministic_torch:
