@@ -197,6 +197,7 @@ ignore = [
     "PLR0913", # muitos argumentos em função — comum em pipelines de ML
     "PLR2004", # "magic value" em comparação — comum em thresholds de modelo
     "TRY003",  # mensagem longa em exceção customizada
+    "PLR0917", # muitos parâmetros em função — comum em pipelines de ML
 ]
 
 [tool.ruff.lint.isort]
@@ -258,12 +259,18 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=xml",
 ]
+filterwarnings = [
+    # Avisos internos de bibliotecas de terceiros, fora do nosso controle.
+    "ignore:.*set_(bad|over|under) function will be deprecated.*:PendingDeprecationWarning:shap.*",
+    "ignore:.*default behavior of `how='horizontal'`.*:DeprecationWarning:pandera.*",
+]
 markers = [
     "smoke: testes rápidos rodados no pre-commit",
     "integration: testes de pipeline ponta a ponta",
     "ml: testes comportamentais / de regressão de métrica",
     "slow: testes lentos (pulados por padrão localmente)",
 ]
+
 
 # =============================================================================
 # COVERAGE — meta de cobertura ≥ 80%

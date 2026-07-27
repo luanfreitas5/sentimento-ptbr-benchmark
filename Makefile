@@ -87,10 +87,22 @@ test:  ## Roda os testes com cobertura
 	$(UV) run pytest -m "not slow"
 
 smoke:  ## Roda apenas os smoke tests
-	$(UV) run pytest -m smoke -q
+	$(UV) run pytest -m smoke -q --no-cov
 
-precommit:  ## Roda todos os hooks do pre-commit em todos os arquivos
+hooks:  ## Instala os hooks do pre-commit
+	$(UV) run pre-commit install
+	$(UV) run pre-commit install --hook-type commit-msg
+	$(UV) run detect-secrets scan > .secrets.baseline
+
+pre-commit:  ## Roda todos os hooks do pre-commit em todos os arquivos
 	$(UV) run pre-commit run --all-files
+
+update-hooks:  ## Atualiza os hooks do pre-commit
+	$(UV) run pre-commit autoupdate
+
+release:  ## Cria uma nova release (versão + changelog + tag)
+	$(UV) run cz changelog
+	$(UV) run cz bump --changelog --yes
 
 # --- Limpeza de saídas do pipeline ------------------------------------------
 clean-processed:  ## Remove os artefatos de dados processados
