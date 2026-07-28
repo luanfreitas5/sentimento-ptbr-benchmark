@@ -6,7 +6,7 @@
 
 [project]
 name = "sentimento-ptbr-benchmark"
-version = "0.1.0"
+version = "0.2.0"
 description = "Benchmark de análise de sentimento em PT-BR: TF-IDF + Regressão Logística vs. fine-tuning do BERTimbau, com avaliação cross-dataset."
 readme = "README.md"
 requires-python = ">=3.10"
