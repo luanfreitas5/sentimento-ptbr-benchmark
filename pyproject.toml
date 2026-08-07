@@ -74,7 +74,7 @@ bert = [
     "torch>=2.2",
     "transformers>=4.44",
     "accelerate>=0.33",
-    "datasets>=2.20",
+    "datasets>=5.0.1",
 ]
 
 # Versionamento de dados/modelos (corpora somam vários GB)
