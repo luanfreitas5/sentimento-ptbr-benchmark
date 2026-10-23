@@ -728,8 +728,8 @@
 <p>O pipeline é exposto por quatro subcomandos da CLI (<code>src/main.py</code>), com atalhos
 equivalentes no <code>Makefile</code>.</p>
 <h2 id="1-preparacao-dos-corpora">1. Preparação dos corpora<a class="headerlink" href="#1-preparacao-dos-corpora" title="Permanent link">&para;</a></h2>
-<p>Limpa o texto, valida os contratos, amostra de forma estratificada, divide em
-treino/teste e salva em parquet (<code>data/processed/&lt;domínio&gt;/{train,test}.parquet</code>).</p>
+<p>Segue a arquitetura medalhão: <strong>bronze -&gt; silver</strong> limpa o texto, valida o contrato e salva o corpus completo em parquet (<code>data/silver/&lt;domínio&gt;.parquet</code>); <strong>silver -&gt; gold</strong> amostra de forma estratificada, divide em
+treino/teste e salva em parquet (<code>data/gold/&lt;domínio&gt;/{train,test}.parquet</code>).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>prepare
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># ou: uv run python -m src.main prepare --domains b2w olist</span>
 </code></pre></div>
