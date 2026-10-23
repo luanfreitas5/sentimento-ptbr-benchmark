@@ -5,8 +5,8 @@ equivalentes no `Makefile`.
 
 ## 1. Preparação dos corpora
 
-Limpa o texto, valida os contratos, amostra de forma estratificada, divide em
-treino/teste e salva em parquet (`data/processed/<domínio>/{train,test}.parquet`).
+Segue a arquitetura medalhão: **bronze -> silver** limpa o texto, valida o contrato e salva o corpus completo em parquet (`data/silver/<domínio>.parquet`); **silver -> gold** amostra de forma estratificada, divide em
+treino/teste e salva em parquet (`data/gold/<domínio>/{train,test}.parquet`).
 
 ```bash
 make prepare

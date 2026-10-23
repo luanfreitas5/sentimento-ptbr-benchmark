@@ -30,10 +30,10 @@ uv run detect-secrets scan > .secrets.baseline
 
 Baixe os cinco CSVs do dataset
 [Brazilian Portuguese Sentiment Analysis Datasets](https://www.kaggle.com/datasets/fredericods/ptbr-sentiment-analysis-datasets)
-e coloque-os em `data/raw/`:
+e coloque-os em `data/bronze/` (camada bronze: dados como recebidos, imutáveis):
 
 ```
-data/raw/
+data/bronze/
 ├── b2w.csv
 ├── buscape.csv
 ├── olist.csv
@@ -41,8 +41,8 @@ data/raw/
 └── utlc_movies.csv
 ```
 
-Os dados **não** são versionados no Git. O manifest gerado na preparação
-(`data/processed/manifest.json`) guarda o hash SHA-256 de cada corpus para
+Os dados **não** são versionados no Git. Os manifests gerados na preparação
+(`data/bronze/manifest.json`, `data/silver/manifest.json` e `data/gold/manifest.json`) guardam o hash SHA-256 de cada corpus para
 rastrear a versão.
 
 ## Variáveis de ambiente

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from src.metrics.classification import (
@@ -40,6 +40,7 @@ def test_bootstrap_interval_contains_point_estimate() -> None:
     assert lower <= point <= upper
 
 
+@settings(deadline=None)  # sklearn tem custo variável na primeira chamada
 @given(
     labels=st.lists(st.integers(min_value=0, max_value=1), min_size=4, max_size=50),
 )

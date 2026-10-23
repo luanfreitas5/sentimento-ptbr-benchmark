@@ -1,0 +1,649 @@
+{
+  "model": "tfidf_logreg",
+  "domains": [
+    "b2w",
+    "buscape",
+    "olist",
+    "utlc_apps",
+    "utlc_movies"
+  ],
+  "f1_macro_matrix": [
+    [
+      0.914173,
+      0.702515,
+      0.891597,
+      0.815859,
+      0.575473
+    ],
+    [
+      0.872002,
+      0.78743,
+      0.795798,
+      0.773614,
+      0.614913
+    ],
+    [
+      0.888105,
+      0.605114,
+      0.905706,
+      0.783533,
+      0.470829
+    ],
+    [
+      0.893536,
+      0.677647,
+      0.870272,
+      0.860606,
+      0.549851
+    ],
+    [
+      0.729765,
+      0.556673,
+      0.651333,
+      0.725634,
+      0.746602
+    ]
+  ],
+  "cells": {
+    "b2w->b2w": {
+      "train": "b2w",
+      "test": "b2w",
+      "in_domain": true,
+      "metrics": {
+        "accuracy": 0.92525,
+        "f1_macro": 0.9141731367515437,
+        "f1_positive": 0.9450064373735516,
+        "precision_macro": 0.9039762403913347,
+        "recall_macro": 0.9275015522250136
+      },
+      "ci_lower": 0.9048506269839769,
+      "ci_upper": 0.9235927876470116,
+      "confusion": [
+        [
+          1132,
+          81
+        ],
+        [
+          218,
+          2569
+        ]
+      ]
+    },
+    "b2w->buscape": {
+      "train": "b2w",
+      "test": "buscape",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.84425,
+        "f1_macro": 0.7025145045069888,
+        "f1_positive": 0.9078538677710398,
+        "precision_macro": 0.6686811850143262,
+        "recall_macro": 0.8155322249337242
+      },
+      "ci_lower": 0.683100453814846,
+      "ci_upper": 0.7212474571121537,
+      "confusion": [
+        [
+          308,
+          87
+        ],
+        [
+          536,
+          3069
+        ]
+      ]
+    },
+    "b2w->olist": {
+      "train": "b2w",
+      "test": "olist",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.89975,
+        "f1_macro": 0.8915966522288816,
+        "f1_positive": 0.9213262703551108,
+        "precision_macro": 0.8817022429574629,
+        "recall_macro": 0.9088793134451817
+      },
+      "ci_lower": 0.8808182420666172,
+      "ci_upper": 0.9019622967562544,
+      "confusion": [
+        [
+          1251,
+          85
+        ],
+        [
+          316,
+          2348
+        ]
+      ]
+    },
+    "b2w->utlc_apps": {
+      "train": "b2w",
+      "test": "utlc_apps",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.841,
+        "f1_macro": 0.8158592122074919,
+        "f1_positive": 0.8838992332968236,
+        "precision_macro": 0.8029356436093719,
+        "recall_macro": 0.8388117253275125
+      },
+      "ci_lower": 0.803420390395291,
+      "ci_upper": 0.8291484904783989,
+      "confusion": [
+        [
+          943,
+          188
+        ],
+        [
+          448,
+          2421
+        ]
+      ]
+    },
+    "b2w->utlc_movies": {
+      "train": "b2w",
+      "test": "utlc_movies",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.71425,
+        "f1_macro": 0.5754729201028336,
+        "f1_positive": 0.8181962780340385,
+        "precision_macro": 0.5812454901274791,
+        "recall_macro": 0.6685868397363302
+      },
+      "ci_lower": 0.5578214569421912,
+      "ci_upper": 0.5935412702011114,
+      "confusion": [
+        [
+          285,
+          183
+        ],
+        [
+          960,
+          2572
+        ]
+      ]
+    },
+    "buscape->b2w": {
+      "train": "buscape",
+      "test": "b2w",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.89625,
+        "f1_macro": 0.8720016679879025,
+        "f1_positive": 0.9277129419961679,
+        "precision_macro": 0.8914713303153128,
+        "recall_macro": 0.8578033213326152
+      },
+      "ci_lower": 0.860901308798517,
+      "ci_upper": 0.8835002703468946,
+      "confusion": [
+        [
+          922,
+          291
+        ],
+        [
+          124,
+          2663
+        ]
+      ]
+    },
+    "buscape->buscape": {
+      "train": "buscape",
+      "test": "buscape",
+      "in_domain": true,
+      "metrics": {
+        "accuracy": 0.91175,
+        "f1_macro": 0.7874300397183658,
+        "f1_positive": 0.9499929168437455,
+        "precision_macro": 0.7546100396418868,
+        "recall_macro": 0.8372004424234976
+      },
+      "ci_lower": 0.7666452135039045,
+      "ci_upper": 0.8071884474411872,
+      "confusion": [
+        [
+          294,
+          101
+        ],
+        [
+          252,
+          3353
+        ]
+      ]
+    },
+    "buscape->olist": {
+      "train": "buscape",
+      "test": "olist",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.83025,
+        "f1_macro": 0.795797933484109,
+        "f1_positive": 0.8796739323055113,
+        "precision_macro": 0.8274544403051198,
+        "recall_macro": 0.7798378468288647
+      },
+      "ci_lower": 0.7812589989904786,
+      "ci_upper": 0.810156517955474,
+      "confusion": [
+        [
+          839,
+          497
+        ],
+        [
+          182,
+          2482
+        ]
+      ]
+    },
+    "buscape->utlc_apps": {
+      "train": "buscape",
+      "test": "utlc_apps",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.83325,
+        "f1_macro": 0.7736141908943182,
+        "f1_positive": 0.8898067074178093,
+        "precision_macro": 0.8150525913883141,
+        "recall_macro": 0.7522627470885305
+      },
+      "ci_lower": 0.7578691036443085,
+      "ci_upper": 0.7888463965954265,
+      "confusion": [
+        [
+          640,
+          491
+        ],
+        [
+          176,
+          2693
+        ]
+      ]
+    },
+    "buscape->utlc_movies": {
+      "train": "buscape",
+      "test": "utlc_movies",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.848,
+        "f1_macro": 0.6149130007397724,
+        "f1_positive": 0.9145106861642295,
+        "precision_macro": 0.6208566108007448,
+        "recall_macro": 0.6099350504786518
+      },
+      "ci_lower": 0.5926948235894615,
+      "ci_upper": 0.6353852598678167,
+      "confusion": [
+        [
+          140,
+          328
+        ],
+        [
+          280,
+          3252
+        ]
+      ]
+    },
+    "olist->b2w": {
+      "train": "olist",
+      "test": "b2w",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.90125,
+        "f1_macro": 0.8881048279296582,
+        "f1_positive": 0.9264568981567678,
+        "precision_macro": 0.8758450525616135,
+        "recall_macro": 0.9067867803377535
+      },
+      "ci_lower": 0.8767687483177725,
+      "ci_upper": 0.8981582909835021,
+      "confusion": [
+        [
+          1117,
+          96
+        ],
+        [
+          299,
+          2488
+        ]
+      ]
+    },
+    "olist->buscape": {
+      "train": "olist",
+      "test": "buscape",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.73375,
+        "f1_macro": 0.6051135386637876,
+        "f1_positive": 0.8304949864714308,
+        "precision_macro": 0.6104152849632631,
+        "recall_macro": 0.774516757667796
+      },
+      "ci_lower": 0.5880590791275442,
+      "ci_upper": 0.6212337552736795,
+      "confusion": [
+        [
+          326,
+          69
+        ],
+        [
+          996,
+          2609
+        ]
+      ]
+    },
+    "olist->olist": {
+      "train": "olist",
+      "test": "olist",
+      "in_domain": true,
+      "metrics": {
+        "accuracy": 0.9135,
+        "f1_macro": 0.9057060126043264,
+        "f1_positive": 0.9328155339805825,
+        "precision_macro": 0.8965796306077575,
+        "recall_macro": 0.9193887000773229
+      },
+      "ci_lower": 0.8957207439443057,
+      "ci_upper": 0.915210087169654,
+      "confusion": [
+        [
+          1252,
+          84
+        ],
+        [
+          262,
+          2402
+        ]
+      ]
+    },
+    "olist->utlc_apps": {
+      "train": "olist",
+      "test": "utlc_apps",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.809,
+        "f1_macro": 0.7835328571056189,
+        "f1_positive": 0.8577810871183916,
+        "precision_macro": 0.7715369479136727,
+        "recall_macro": 0.813558392265379
+      },
+      "ci_lower": 0.7697842050109226,
+      "ci_upper": 0.796237124529635,
+      "confusion": [
+        [
+          932,
+          199
+        ],
+        [
+          565,
+          2304
+        ]
+      ]
+    },
+    "olist->utlc_movies": {
+      "train": "olist",
+      "test": "utlc_movies",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.56,
+        "f1_macro": 0.47082931569511227,
+        "f1_positive": 0.6880538816022687,
+        "precision_macro": 0.5390531357356002,
+        "recall_macro": 0.5942179438781929
+      },
+      "ci_lower": 0.4550444000262411,
+      "ci_upper": 0.4851049862304779,
+      "confusion": [
+        [
+          299,
+          169
+        ],
+        [
+          1591,
+          1941
+        ]
+      ]
+    },
+    "utlc_apps->b2w": {
+      "train": "utlc_apps",
+      "test": "b2w",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.90975,
+        "f1_macro": 0.8935360689697528,
+        "f1_positive": 0.9350836180543067,
+        "precision_macro": 0.8923730727296464,
+        "recall_macro": 0.8947283805893043
+      },
+      "ci_lower": 0.8832211073719375,
+      "ci_upper": 0.9038734214643952,
+      "confusion": [
+        [
+          1039,
+          174
+        ],
+        [
+          187,
+          2600
+        ]
+      ]
+    },
+    "utlc_apps->buscape": {
+      "train": "utlc_apps",
+      "test": "buscape",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.823,
+        "f1_macro": 0.6776471520262471,
+        "f1_positive": 0.8941070894406222,
+        "precision_macro": 0.6499228837350902,
+        "recall_macro": 0.7981074105935848
+      },
+      "ci_lower": 0.657709612619483,
+      "ci_upper": 0.6966690917274279,
+      "confusion": [
+        [
+          303,
+          92
+        ],
+        [
+          616,
+          2989
+        ]
+      ]
+    },
+    "utlc_apps->olist": {
+      "train": "utlc_apps",
+      "test": "olist",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.88425,
+        "f1_macro": 0.8702720665148458,
+        "f1_positive": 0.9128552606813476,
+        "precision_macro": 0.8692668965203131,
+        "recall_macro": 0.8713103073133013
+      },
+      "ci_lower": 0.8589661737829235,
+      "ci_upper": 0.8814796587029742,
+      "confusion": [
+        [
+          1112,
+          224
+        ],
+        [
+          239,
+          2425
+        ]
+      ]
+    },
+    "utlc_apps->utlc_apps": {
+      "train": "utlc_apps",
+      "test": "utlc_apps",
+      "in_domain": true,
+      "metrics": {
+        "accuracy": 0.881,
+        "f1_macro": 0.8606057500128119,
+        "f1_positive": 0.9139240506329114,
+        "precision_macro": 0.8471142514662179,
+        "recall_macro": 0.8811577400296285
+      },
+      "ci_lower": 0.8496358898770231,
+      "ci_upper": 0.8717485658731294,
+      "confusion": [
+        [
+          997,
+          134
+        ],
+        [
+          342,
+          2527
+        ]
+      ]
+    },
+    "utlc_apps->utlc_movies": {
+      "train": "utlc_apps",
+      "test": "utlc_movies",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.68075,
+        "f1_macro": 0.549850885902798,
+        "f1_positive": 0.7925937956797141,
+        "precision_macro": 0.5676709956709957,
+        "recall_macro": 0.6477637908838362
+      },
+      "ci_lower": 0.5336566131827402,
+      "ci_upper": 0.5657739575990774,
+      "confusion": [
+        [
+          283,
+          185
+        ],
+        [
+          1092,
+          2440
+        ]
+      ]
+    },
+    "utlc_movies->b2w": {
+      "train": "utlc_movies",
+      "test": "b2w",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.79875,
+        "f1_macro": 0.7297650911719711,
+        "f1_positive": 0.8663012788573327,
+        "precision_macro": 0.7863751007167643,
+        "recall_macro": 0.7098486939272579
+      },
+      "ci_lower": 0.713377311344773,
+      "ci_upper": 0.7465807134594203,
+      "confusion": [
+        [
+          587,
+          626
+        ],
+        [
+          179,
+          2608
+        ]
+      ]
+    },
+    "utlc_movies->buscape": {
+      "train": "utlc_movies",
+      "test": "buscape",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.6805,
+        "f1_macro": 0.5566734691966111,
+        "f1_positive": 0.7909715407262021,
+        "precision_macro": 0.5838102883275473,
+        "recall_macro": 0.7201776716585614
+      },
+      "ci_lower": 0.540509772997489,
+      "ci_upper": 0.5742090414848576,
+      "confusion": [
+        [
+          304,
+          91
+        ],
+        [
+          1187,
+          2418
+        ]
+      ]
+    },
+    "utlc_movies->olist": {
+      "train": "utlc_movies",
+      "test": "olist",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.73025,
+        "f1_macro": 0.6513334999112581,
+        "f1_positive": 0.8172115873284771,
+        "precision_macro": 0.7067655247985805,
+        "recall_macro": 0.6431967146787506
+      },
+      "ci_lower": 0.6350543698239234,
+      "ci_upper": 0.6669709686120134,
+      "confusion": [
+        [
+          509,
+          827
+        ],
+        [
+          252,
+          2412
+        ]
+      ]
+    },
+    "utlc_movies->utlc_apps": {
+      "train": "utlc_movies",
+      "test": "utlc_apps",
+      "in_domain": false,
+      "metrics": {
+        "accuracy": 0.7865,
+        "f1_macro": 0.7256344783007072,
+        "f1_positive": 0.8548606390210741,
+        "precision_macro": 0.7373858288927613,
+        "recall_macro": 0.7172627054840008
+      },
+      "ci_lower": 0.7099804887847897,
+      "ci_upper": 0.7401253864964387,
+      "confusion": [
+        [
+          631,
+          500
+        ],
+        [
+          354,
+          2515
+        ]
+      ]
+    },
+    "utlc_movies->utlc_movies": {
+      "train": "utlc_movies",
+      "test": "utlc_movies",
+      "in_domain": true,
+      "metrics": {
+        "accuracy": 0.87425,
+        "f1_macro": 0.7466020174358466,
+        "f1_positive": 0.9264512355607545,
+        "precision_macro": 0.7163577107635166,
+        "recall_macro": 0.7999668476735294
+      },
+      "ci_lower": 0.7273769871626187,
+      "ci_upper": 0.7654012017546339,
+      "confusion": [
+        [
+          329,
+          139
+        ],
+        [
+          364,
+          3168
+        ]
+      ]
+    }
+  }
+}

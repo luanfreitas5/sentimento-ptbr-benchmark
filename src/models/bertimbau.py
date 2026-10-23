@@ -140,7 +140,6 @@ class BertimbauClassifier(SentimentClassifier):
         BertimbauClassifier
             O próprio modelo, com pesos ajustados.
         """
-
         torch, transformers = _require_transformers()
         transformers.set_seed(self.seed)
 

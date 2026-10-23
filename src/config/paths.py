@@ -8,8 +8,8 @@ Examples
 --------
 >>> from src.config.paths import get_paths
 >>> paths = get_paths()
->>> paths.raw_dir.name
-'raw'
+>>> paths.bronze_dir.name
+'bronze'
 """
 
 from __future__ import annotations
@@ -34,8 +34,10 @@ class ProjectPaths:
     ----------
     root : Path
         Raiz do repositório.
-    raw_dir, interim_dir, processed_dir : Path
-        Estágios dos dados (``data/raw``, ``data/interim``, ``data/processed``).
+    bronze_dir, silver_dir, gold_dir : Path
+        Camadas medalhão dos dados: ``data/bronze`` (como recebido, imutável),
+        ``data/silver`` (limpo, tipado e validado) e ``data/gold`` (splits
+        prontos para modelagem).
     models_dir : Path
         Diretório de modelos treinados.
     figures_dir, metrics_dir, model_cards_dir, datasheets_dir : Path
@@ -43,13 +45,13 @@ class ProjectPaths:
     logs_dir : Path
         Diretório de logs.
     mlruns_dir : Path
-        Backend store local do MLflow.
+        Diretório do banco SQLite do MLflow (``mlruns/mlflow.db``).
     """
 
     root: Path
-    raw_dir: Path
-    interim_dir: Path
-    processed_dir: Path
+    bronze_dir: Path
+    silver_dir: Path
+    gold_dir: Path
     models_dir: Path
     reports_dir: Path
     figures_dir: Path
@@ -59,23 +61,27 @@ class ProjectPaths:
     logs_dir: Path
     mlruns_dir: Path
 
-    def raw_dataset(self, name: str) -> Path:
-        """Retorna o caminho do CSV bruto de um domínio (ex.: ``b2w``)."""
-        return self.raw_dir / f"{name}.csv"
+    def bronze_dataset(self, name: str) -> Path:
+        """Retorna o caminho do CSV bronze de um domínio (ex.: ``b2w``)."""
+        return self.bronze_dir / f"{name}.csv"
 
-    def processed_split(self, name: str, split: str) -> Path:
-        """Retorna o caminho do parquet de um split (``train``/``test``)."""
-        return self.processed_dir / name / f"{split}.parquet"
+    def silver_dataset(self, name: str) -> Path:
+        """Retorna o caminho do parquet silver (limpo e validado) de um domínio."""
+        return self.silver_dir / f"{name}.parquet"
+
+    def gold_split(self, name: str, split: str) -> Path:
+        """Retorna o caminho do parquet gold de um split (``train``/``test``)."""
+        return self.gold_dir / name / f"{split}.parquet"
 
     def model_dir(self, model_name: str, domain: str) -> Path:
         """Retorna o diretório de um modelo treinado em um domínio."""
         return self.models_dir / model_name / domain
 
     def ensure_output_dirs(self) -> None:
-        """Cria os diretórios de saída (interim, processed, reports, logs...)."""
+        """Cria os diretórios de saída (silver, gold, reports, logs...)."""
         for directory in (
-            self.interim_dir,
-            self.processed_dir,
+            self.silver_dir,
+            self.gold_dir,
             self.models_dir,
             self.figures_dir,
             self.metrics_dir,
@@ -124,9 +130,9 @@ def get_paths(config_file: Path = PATHS_CONFIG) -> ProjectPaths:
 
     return ProjectPaths(
         root=ROOT,
-        raw_dir=resolve(data["raw"]),
-        interim_dir=resolve(data["interim"]),
-        processed_dir=resolve(data["processed"]),
+        bronze_dir=resolve(data["bronze"]),
+        silver_dir=resolve(data["silver"]),
+        gold_dir=resolve(data["gold"]),
         models_dir=resolve(cfg["models"]),
         reports_dir=resolve(reports["root"]),
         figures_dir=resolve(reports["figures"]),

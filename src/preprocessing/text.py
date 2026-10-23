@@ -25,7 +25,7 @@ _PUNCT_REPEAT_RE = re.compile(r"([!?.,])\1+")
 
 
 def normalize_whitespace(text: str) -> str:
-    """Colapsa espaços em branco consecutivos e remove bordas.
+    r"""Colapsa espaços em branco consecutivos e remove bordas.
 
     Parameters
     ----------
@@ -39,7 +39,7 @@ def normalize_whitespace(text: str) -> str:
 
     Examples
     --------
-    >>> normalize_whitespace("  ótimo   produto \\n ")
+    >>> normalize_whitespace("  ótimo   produto \n ")
     'ótimo produto'
     """
     return _WHITESPACE_RE.sub(" ", text).strip()

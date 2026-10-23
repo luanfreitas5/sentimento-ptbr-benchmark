@@ -1,131 +1,105 @@
-# 🇧🇷 Benchmark de Análise de Sentimento em PT-BR
+# BERTimbau eleva o F1-macro de sentimento em PT-BR de 0,843 para 0,890 — e reduz a perda fora do domínio
 
-> TF-IDF + Regressão Logística **vs.** fine-tuning do **BERTimbau**, com avaliação **cross-dataset** (treina em um domínio, testa em outro) como diferencial experimental.
+[![CI](https://github.com/luanfreitas5/sentimento-ptbr-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/luanfreitas5/sentimento-ptbr-benchmark/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/luanfreitas5/sentimento-ptbr-benchmark/graph/badge.svg)](https://codecov.io/gh/luanfreitas5/sentimento-ptbr-benchmark)
+[![docs](https://github.com/luanfreitas5/sentimento-ptbr-benchmark/actions/workflows/docs.yml/badge.svg)](https://luanfreitas5.github.io/sentimento-ptbr-benchmark/)
+[![License](https://img.shields.io/github/license/luanfreitas5/sentimento-ptbr-benchmark)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue) <!-- = matriz do CI (tests.yml) -->
 
-[![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)](.github/workflows/tests.yml)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen)](.github/workflows/tests.yml)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
-[![Ruff](https://img.shields.io/badge/lint-ruff-D7FF64?logo=ruff&logoColor=black)](pyproject.toml)
-[![MLflow](https://img.shields.io/badge/tracking-MLflow-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+> **Resultado:** o BERTimbau fine-tuned atinge F1-macro in-domain médio = **0,890** contra **0,843** do baseline TF-IDF + Regressão Logística (5 corpora de ~4.000 reviews de teste cada; IC 95% por bootstrap em cada domínio, tabela abaixo). Fora do domínio a média cai para **0,796** (BERTimbau) e **0,722** (baseline): o gap de generalização é de 0,095 vs. 0,121. Ou seja, o transformer compensa o custo, mas **nenhum dos dois modelos é confiável em filmes quando treinado em outro domínio**.
 
----
+## 🎯 Problema
 
-## 🎯 Motivação
+- **Quem decide o quê:** pesquisadores/engenheiros de NLP escolhem entre um baseline barato (CPU, segundos) e um fine-tuning de BERT (GPU, minutos) para classificar a polaridade de avaliações em português brasileiro, e precisam saber se o modelo treinado em um domínio serve em outro.
+- **Custo dos erros:** os corpora são dominados pela classe positiva (67–90% no teste); errar a classe negativa é o erro caro para quem monitora reputação → **métrica principal:** F1-macro, porque a acurácia premia o modelo que só prevê "positivo".
+- **Unidade de predição:** uma avaliação textual por linha → polaridade binária (0 = negativo, 1 = positivo). Não há dimensão temporal: split estratificado aleatório por domínio.
 
-Análise de sentimento em **português** é um recurso ainda escasso frente ao inglês. Este projeto entrega um **benchmark reprodutível e publicável** que responde a duas perguntas de valor prático:
+## 🗂️ Dados
 
-1. **Vale a pena o custo do BERTimbau?** — quanto um transformer fine-tuned supera um baseline clássico (TF-IDF + Regressão Logística), e a diferença é **estatisticamente significativa**?
-2. **Os modelos generalizam entre domínios?** — treinar em avaliações de e-commerce e aplicar em avaliações de filmes funciona? O **diferencial** aqui é a **matriz cross-dataset**: treina em cada um dos 5 corpora e testa em **todos** eles.
+| Item | Valor |
+|---|---|
+| Fonte e licença | [Kaggle — ptbr-sentiment-analysis-datasets](https://www.kaggle.com/datasets/fredericods/ptbr-sentiment-analysis-datasets) — licença de cada corpus: ver a página do Kaggle (não redistribuímos os dados) |
+| Tamanho | 5 domínios (`b2w`, `buscape`, `olist`, `utlc_apps`, `utlc_movies`); amostra estratificada de 20.000 por domínio → ~16.000 treino / 4.000 teste ([`data/gold/manifest.json`](data/README.md)) |
+| Período | 2026 |
+| Alvo e prevalência (teste) | `polarity`; positivos: b2w 69,7% · buscape 90,1% · olist 66,6% · utlc_apps 71,7% · utlc_movies 88,3% |
+| Camadas | `data/bronze` (CSV como recebido) → `data/silver` (limpo, validado) → `data/gold` (splits) — ver [`data/README.md`](data/README.md) |
+| Documentação | [Datasheet](reports/datasheets/ptbr_sentiment_datasets.md) |
 
-## 🧪 O diferencial: avaliação cross-dataset
+## 📊 Resultados
 
-Cada modelo é treinado em um domínio e avaliado em **todos** os domínios, produzindo uma matriz `N × N` de F1-macro:
+Protocolo: amostra estratificada de 20.000 por domínio, split 80/20 estratificado, seed 42; IC 95% por **bootstrap (1.000 reamostragens) no conjunto de teste** de cada domínio. Matriz cross-dataset: treina em cada domínio e testa em todos (5 × 5). Fonte dos números: [`benchmark_tfidf_logreg.json`](reports/metrics/benchmark_tfidf_logreg.json), [`benchmark_bertimbau.json`](reports/metrics/benchmark_bertimbau.json) e [`summary.json`](reports/metrics/summary.json).
 
-- **Diagonal** → desempenho *in-domain* (mesmo domínio de treino e teste);
-- **Fora da diagonal** → desempenho *out-of-domain* (transferência entre domínios);
-- **Gap de generalização** = média in-domain − média out-of-domain.
+**In-domain — F1-macro (IC 95%)**
 
-Isso expõe algo que um único split esconde: um modelo pode ir muito bem no seu domínio e desabar fora dele.
-
-## 📊 Dados
-
-[Brazilian Portuguese Sentiment Analysis Datasets](https://www.kaggle.com/datasets/fredericods/ptbr-sentiment-analysis-datasets) — cinco corpora rotulados em polaridade (0 = negativo, 1 = positivo) e nota (1–5):
-
-| Domínio | Fonte | Conteúdo |
+| Domínio | Baseline: TF-IDF + LogReg | BERTimbau |
 |---|---|---|
-| `b2w` | B2W / Americanas | e-commerce (varejo) |
-| `buscape` | Buscapé | comparador de preços |
-| `olist` | Olist | marketplace |
-| `utlc_apps` | UTLC | avaliações de apps |
-| `utlc_movies` | UTLC | avaliações de filmes |
+| b2w | 0,914 (0,905–0,924) | **0,955** (0,947–0,962) |
+| buscape | 0,787 (0,767–0,807) | **0,845** (0,823–0,865) |
+| olist | 0,906 (0,896–0,915) | **0,938** (0,930–0,946) |
+| utlc_apps | 0,861 (0,850–0,872) | **0,896** (0,886–0,906) |
+| utlc_movies | 0,747 (0,727–0,765) | **0,817** (0,796–0,836) |
+| **Média in-domain** | 0,843 | **0,890** |
+| Média out-of-domain | 0,722 | **0,796** |
+| Gap de generalização | 0,121 | **0,095** |
 
-> Baixe os CSVs do Kaggle para `data/raw/`. Os dados **não** são versionados no Git (ver `.gitignore`); em produção use DVC.
+- **Diferença vs baseline:** +0,047 de F1-macro in-domain (+0,074 fora do domínio). Em todos os 5 domínios os ICs 95% **não se sobrepõem**, o que é indício forte mas **não é um teste formal**; o McNemar ([`significance_mcnemar.json`](reports/metrics/)) ainda não foi gerado neste snapshot, e o IC da média entre domínios também não (TODO).
+- **Pior segmento:** `utlc_movies` é o mais difícil nos dois modelos (in-domain 0,817 / 0,747; média treinando em outro domínio: 0,696 / 0,553). Pior célula: BERTimbau `utlc_movies → olist` = 0,600; baseline `olist → utlc_movies` = 0,471 (ver [Model Card](reports/model_cards/bertimbau_sentiment.md)).
+- **Limite do protocolo:** apenas uma seed e um split por domínio; a variância entre treinos não está quantificada.
 
-## 🏗️ Arquitetura
+![Matriz cross-dataset de F1-macro do BERTimbau](reports/figures/cross_dataset_bertimbau.png)
+![Matriz cross-dataset de F1-macro do baseline TF-IDF + LogReg](reports/figures/cross_dataset_tfidf_logreg.png)
 
-```
-src/
-├── config/         # settings (Pydantic), paths, logging (rich), seeds
-├── constants/      # colunas, rótulos, catálogo de domínios
-├── schemas/        # contratos de dados (pandera): raw e processed
-├── preprocessing/  # limpeza de texto PT-BR (para o TF-IDF)
-├── data/           # loader, amostragem estratificada, split
-├── models/         # interface comum + TF-IDF/LogReg + BERTimbau + factory
-├── metrics/        # F1-macro e IC por bootstrap
-├── evaluation/     # avaliador, McNemar, consolidação in/out-domain
-├── experiment/     # rastreamento MLflow
-├── visualization/  # matriz cross-dataset, matrizes de confusão
-├── pipelines/      # preparação + benchmark ponta a ponta
-└── main.py         # CLI (prepare / train / benchmark / evaluate)
-```
+## 🔁 Reproduzir
 
-Os dois modelos implementam a mesma interface `SentimentClassifier` (`fit`/`predict`/`predict_proba`/`save`/`load`), então o pipeline os trata de forma intercambiável (inversão de dependência).
-
-## 🚀 Quickstart
+Requisitos: [uv](https://docs.astral.sh/uv/), `make`, os CSVs do Kaggle em `data/bronze/` (ver [`data/README.md`](data/README.md)); o BERTimbau exige o extra `bert` e, idealmente, GPU NVIDIA (CUDA 12.9). Nenhum segredo é obrigatório (ver `.env.example`). Tempo: não medido (TODO).
 
 ```bash
-# 1. Ambiente (uv). Baseline sem torch:
-make install
-# ...ou incluindo o fine-tuning do BERTimbau (torch/transformers):
+git clone https://github.com/luanfreitas5/sentimento-ptbr-benchmark.git
+cd sentimento-ptbr-benchmark
+```
+
+<!-- verify:start -->
+```bash
+uv sync --locked
+make data baseline
+```
+<!-- verify:end -->
+
+Para o BERTimbau e a consolidação (fora do bloco verificado — exige GPU):
+
+```bash
 make install-bert
-
-# 2. Baixe os CSVs do Kaggle para data/raw/ e prepare os corpora:
-make prepare
-
-# 3. Baseline (TF-IDF + LogReg) em todos os domínios:
-make baseline
-
-# 4. BERTimbau (requer make install-bert e, idealmente, GPU):
 make bert
-
-# 5. Benchmark cross-dataset completo + consolidação:
-make benchmark
-make evaluate
-
-# 6. Inspecione os experimentos no MLflow:
-make mlflow-ui
+make evaluate     # gera reports/metrics/summary.json
+make mlflow-ui    # runs, parâmetros e métricas (SQLite)
 ```
 
-Também disponível como CLI:
+Os números de Resultados foram gerados com `uv.lock` do repositório; a versão exata de Python do run não foi registrada (TODO). Versões diferentes de Python podem resolver wheels distintos e deslocar as métricas na terceira casa decimal.
 
-```bash
-uv run python -m src.main prepare
-uv run python -m src.main train --model tfidf_logreg
-uv run python -m src.main benchmark --no-track
-uv run python -m src.main evaluate
+## 🧱 Estrutura
+
+```
+configs/        # YAMLs validados com Pydantic (config, paths, logging, model_params)
+data/           # bronze → silver → gold (fora do Git; ver data/README.md)
+src/
+├── data/ preprocessing/ schemas/   # carga, limpeza PT-BR e contratos pandera
+├── models/                         # SentimentClassifier: TF-IDF+LogReg e BERTimbau
+├── evaluation/ metrics/            # F1-macro, IC bootstrap, McNemar
+├── pipelines/                      # preparação e benchmark ponta a ponta
+└── main.py                         # CLI: prepare | train | benchmark | evaluate
+reports/        # figures/, metrics/, model_cards/, datasheets/
+tests/          # unitários, integração, propriedades (hypothesis)
 ```
 
-## 📈 Saídas
+Decisões que importam: `polars` + `pandera` para o contrato de dados em cada fronteira de camada; `pandas` apenas onde exigido pelo scikit-learn/Hugging Face; MLflow com backend SQLite (não o file store); F1-macro em vez de acurácia por causa do desbalanceamento.
 
-- `reports/figures/cross_dataset_<modelo>.png` — heatmap da matriz cross-dataset;
-- `reports/metrics/benchmark_<modelo>.json` — matriz de F1 + métricas por célula (com IC 95%);
-- `reports/metrics/significance_mcnemar.json` — teste de McNemar (baseline vs. BERTimbau, in-domain);
-- `reports/metrics/summary.json` — F1 médio in-domain vs. out-of-domain e gap de generalização;
-- `mlruns/` — parâmetros, métricas e artefatos por execução (MLflow).
+## ⚠️ Limitações
 
-## 🔬 Rigor experimental (senior bar)
+- **Domínio:** treinar em filmes (`utlc_movies`) e testar em outros domínios, ou o contrário, degrada muito o F1 (0,60–0,74 no BERTimbau). Não use o modelo fora dos domínios avaliados sem revalidar.
+- **Tarefa binária:** reviews neutras foram removidas na construção original dos corpora; ironia, sarcasmo e aspectos não são cobertos.
+- **Estatística:** uma seed, um split por domínio; sem teste de significância formal publicado nem IC para as médias entre domínios; sem calibração (Brier) nem auditoria de fairness por subgrupo.
+- **Dados:** amostra de 20.000 por domínio, não os corpora completos; viés de plataformas e de época herdado das fontes; período de coleta não documentado.
 
-- **Incerteza:** toda métrica reportada com intervalo de confiança (bootstrap), nunca um ponto solto;
-- **Significância:** McNemar para decidir se o BERTimbau realmente supera o baseline;
-- **Slices:** desempenho reportado por domínio, não só agregado;
-- **Reprodutibilidade:** *seed everything*, lock file commitado, hash SHA-256 dos corpora no manifest;
-- **Contratos de dados:** `pandera` valida a entrada e a saída de cada etapa;
-- **Métrica principal:** F1-macro — os corpora pendem para a classe positiva, e ambas as classes importam.
+## 📄 Licença e citação
 
-## 🛠️ Desenvolvimento
-
-```bash
-make quality   # ruff, basedpyright, bandit, vulture, xenon, interrogate
-make test      # pytest com cobertura (≥ 80%)
-make docs      # MkDocs Material (referência da API a partir das docstrings)
-```
-
-## 📚 Documentação
-
-Guias e referência completa da API em **`docs/`** (publicados via GitHub Pages). Comece por [`docs/index.md`](docs/index.md).
-
-## 📄 Licença
-
-Distribuído sob a licença [MIT](LICENSE).
+MIT — ver [LICENSE](LICENSE). Sem artigo associado até o momento (não há `CITATION.cff`).

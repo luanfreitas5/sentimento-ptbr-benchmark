@@ -1,0 +1,12 @@
+{
+  "tfidf_logreg": {
+    "in_domain_f1": 0.8429,
+    "out_domain_f1": 0.7222,
+    "generalization_gap": 0.1207
+  },
+  "bertimbau": {
+    "in_domain_f1": 0.8901,
+    "out_domain_f1": 0.7957,
+    "generalization_gap": 0.0945
+  }
+}

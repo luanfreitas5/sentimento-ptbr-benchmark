@@ -112,8 +112,8 @@ def load_domain_splits(domain: str, paths: ProjectPaths) -> DomainSplits:
     DomainSplits
         Textos (limpo e original) e rótulos de treino e teste.
     """
-    train = pl.read_parquet(paths.processed_split(domain, "train"))
-    test = pl.read_parquet(paths.processed_split(domain, "test"))
+    train = pl.read_parquet(paths.gold_split(domain, "train"))
+    test = pl.read_parquet(paths.gold_split(domain, "test"))
     return DomainSplits(
         train_text_clean=train[TEXT_CLEAN].to_list(),
         train_text_raw=train[RawColumns.REVIEW_TEXT].to_list(),
@@ -227,7 +227,6 @@ def _compare_models_in_domain(
     paths: ProjectPaths,
 ) -> None:
     """Compara os dois modelos in-domain (diagonal) via teste de McNemar."""
-
     baseline_name = TfidfLogRegClassifier.name
     bert_name = BertimbauClassifier.name
     if baseline_name not in results or bert_name not in results:
@@ -293,7 +292,11 @@ def run_benchmark(
     data = {domain: load_domain_splits(domain, paths) for domain in domains}
 
     tracker = (
-        MlflowTracker(settings.mlflow_tracking_uri, settings.project.project_name)
+        MlflowTracker(
+            settings.mlflow_tracking_uri,
+            settings.project.project_name,
+            settings.project.experiment.registry_uri,
+        )
         if track
         else None
     )

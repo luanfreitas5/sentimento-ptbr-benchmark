@@ -7,10 +7,10 @@
 #      código (nbstripout/nbqa já são dependências do projeto, mas não
 #      rodavam em CI até agora).
 #
-# Observação: o projeto ainda não tem DVC de fato configurado (não há
-# .dvc/ nem dvc.yaml no repo, embora o .gitignore já reserve espaço pra
-# isso) — o dataset Olist é baixado manualmente em data/raw. Quando o DVC
-# for adotado, adicione aqui um job `dvc status`/`dvc repro --dry`.
+# Observação: `dvc.yaml` declara o DAG do pipeline, mas o `dvc init` e o
+# remote de armazenamento são configurados por quem for reproduzir o estudo
+# (os dados não são redistribuídos — ver reports/datasheets/). Por isso não
+# há um job `dvc repro --dry` aqui: ele exigiria os dados em disco.
 # =============================================================================
 name: Reproducibility
 
@@ -53,8 +53,10 @@ jobs:
 
       - run: uv sync --dev
 
+      # `--verify` apenas checa e falha; sem ele, o nbstripout reescreveria os
+      # arquivos no runner e o job passaria mesmo com outputs commitados.
       - name: Checar se algum notebook tem output não removido
-        run: uv run nbstripout notebooks/*
+        run: uv run nbstripout --verify notebooks/*.ipynb
 
       - name: Lint dos notebooks (nbqa + ruff)
         run: uv run nbqa ruff notebooks/

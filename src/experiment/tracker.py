@@ -8,15 +8,12 @@ treino, ao domínio de teste e ao hash dos dados — garantindo linhagem complet
 from __future__ import annotations
 
 import logging
-import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 import mlflow
-
-os.environ["MLFLOW_ALLOW_FILE_STORE"] = "true"
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +24,16 @@ class MlflowTracker:
     Parameters
     ----------
     tracking_uri : str
-        URI do backend do MLflow (ex.: ``./mlruns`` para store local).
+        URI do backend do MLflow (ex.: ``sqlite:///mlruns/mlflow.db``); o file store
+        (``./mlruns``) está em modo de manutenção e não é usado.
     experiment_name : str, optional
         Nome do experimento, by default ``sentimento-ptbr-benchmark``.
+    registry_uri : str | None, optional
+        URI do Model Registry; se ``None``, usa o mesmo banco do tracking.
 
     Examples
     --------
-    >>> tracker = MlflowTracker("./mlruns")  # doctest: +SKIP
+    >>> tracker = MlflowTracker("sqlite:///mlruns/mlflow.db")  # doctest: +SKIP
     >>> with tracker.start_run("tfidf_logreg__b2w->olist"):  # doctest: +SKIP
     ...     tracker.log_params({"model": "tfidf_logreg"})
     ...     tracker.log_metrics({"f1_macro": 0.91})
@@ -43,10 +43,12 @@ class MlflowTracker:
         self,
         tracking_uri: str,
         experiment_name: str = "sentimento-ptbr-benchmark",
+        registry_uri: str | None = None,
     ) -> None:
         self.tracking_uri = tracking_uri
         self.experiment_name = experiment_name
         mlflow.set_tracking_uri(tracking_uri)
+        mlflow.set_registry_uri(registry_uri or tracking_uri)
         mlflow.set_experiment(experiment_name)
 
     @contextmanager

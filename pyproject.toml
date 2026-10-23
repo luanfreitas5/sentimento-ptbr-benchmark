@@ -192,12 +192,16 @@ select = [
     "RUF",    # regras específicas do próprio Ruff
     "PL",     # pylint (subconjunto)
     "TRY",    # tryceratops — boas práticas de exception handling
+    "S",      # flake8-bandit — segurança básica já no lint
+    "D",      # pydocstyle — docstrings NumPy (convention abaixo)
 ]
 ignore = [
     "PLR0913", # muitos argumentos em função — comum em pipelines de ML
     "PLR2004", # "magic value" em comparação — comum em thresholds de modelo
     "TRY003",  # mensagem longa em exceção customizada
     "PLR0917", # muitos parâmetros em função — comum em pipelines de ML
+    "D203",    # conflita com D211 (linha em branco antes da classe)
+    "D213",    # conflita com D212 (resumo na primeira linha, convenção NumPy)
 ]
 
 [tool.ruff.lint.isort]
@@ -207,8 +211,8 @@ known-first-party = ["src"]
 convention = "numpy"  # docstrings no formato NumPy
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ARG", "PLR2004"]        # fixtures e valores fixos em testes
-"notebooks/*" = ["E402", "F401"]      # imports fora de ordem/não usados em notebooks
+"tests/*" = ["ARG", "PLR2004", "S101", "D"]  # fixtures, valores fixos, assert e sem docstring formal
+"notebooks/*" = ["E402", "F401", "D"] # imports fora de ordem/não usados em notebooks
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -254,6 +258,7 @@ ignore = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = [
+    "-ra",
     "--strict-markers",
     "--cov=src",
     "--cov-report=term-missing",

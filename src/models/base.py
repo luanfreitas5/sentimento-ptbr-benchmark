@@ -79,7 +79,7 @@ class SentimentClassifier(ABC):
 
     @abstractmethod
     def save(self, path: Path) -> None:
-        """Persiste o modelo treinado no diretório indicado.
+        """Salva o modelo treinado no diretório indicado.
 
         Parameters
         ----------

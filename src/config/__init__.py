@@ -9,7 +9,7 @@ settings
     Carrega e valida ``config.yaml`` e ``model_params.yaml`` com Pydantic,
     além de variáveis de ambiente/segredos via ``.env``.
 logging
-    Configura logging com ``RichHandler`` e arquivo rotativo diário.
+    Configura o logging uma única vez via ``dictConfig`` (console ``rich`` + arquivo diário).
 environment
     Fixa sementes de aleatoriedade (reprodutibilidade determinística).
 """

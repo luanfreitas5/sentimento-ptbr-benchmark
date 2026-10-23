@@ -10,6 +10,9 @@
 # Padrão: o git detecta arquivos de texto e normaliza para LF no commit.
 * text=auto eol=lf
 
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
 # --- Código e configuração (sempre LF) --------------------------------------
 *.py        text eol=lf
 *.ipynb     text eol=lf

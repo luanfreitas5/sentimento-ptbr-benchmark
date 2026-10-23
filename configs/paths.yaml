@@ -4,9 +4,9 @@
 # =============================================================================
 
 data:
-  raw: data/raw               # corpora originais (.csv) — nunca modificar
-  interim: data/interim       # dados intermediários (limpos)
-  processed: data/processed   # splits prontos para modelagem (.parquet)
+  bronze: data/bronze         # corpora como recebidos (.csv) — imutável, nunca modificar
+  silver: data/silver         # corpora limpos, tipados e validados (.parquet)
+  gold: data/gold             # splits treino/teste prontos para modelagem (.parquet)
 
 models: models                # modelos treinados por domínio
 reports:
@@ -17,4 +17,4 @@ reports:
   datasheets: reports/datasheets
 
 logs: logs
-mlruns: mlruns                # backend store local do MLflow
+mlruns: mlruns                # diretório do banco SQLite do MLflow (mlflow.db)

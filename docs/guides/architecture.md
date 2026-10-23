@@ -18,16 +18,17 @@
 ## Fluxo de dados
 
 ```
-data/raw/*.csv
-   │  loader (limpeza + contrato bruto)
+data/bronze/*.csv  (imutável)
+   │  loader (limpeza + contrato bronze)
    ▼
-sampler (estratificado)  ─►  contrato processado  ─►  splitter
+data/silver/<domínio>.parquet  (limpo, tipado, validado)
+   │  sampler (estratificado)  ─►  contrato  ─►  splitter
    │
    ▼
-data/processed/<domínio>/{train,test}.parquet
+data/gold/<domínio>/{train,test}.parquet
    │  benchmark: treina em cada domínio, testa em todos
    ▼
-reports/metrics/*.json  +  reports/figures/*.png  +  mlruns/
+reports/metrics/*.json  +  reports/figures/*.png  +  mlruns/mlflow.db (SQLite)
 ```
 
 ## Escolhas técnicas defensáveis

@@ -20,7 +20,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.config.paths import CONFIGS_DIR
@@ -47,6 +47,21 @@ class SplitConfig(BaseModel):
     stratify: bool = True
 
 
+class ExperimentConfig(BaseModel):
+    """Rastreamento de experimentos (MLflow com backend SQLite, nunca file store)."""
+
+    tracking_uri: str = "sqlite:///mlruns/mlflow.db"
+    registry_uri: str | None = None
+
+    @field_validator("tracking_uri", "registry_uri")
+    @classmethod
+    def validate_not_file_store(cls, value: str | None) -> str | None:
+        """Rejeita o file store (``./mlruns``), em modo de manutenção no MLflow."""
+        if value is not None and not value.startswith(("sqlite:", "postgresql", "mysql", "http")):
+            raise ValueError(f"Use um backend de banco (ex.: sqlite:///mlruns/mlflow.db): {value}")
+        return value
+
+
 class ProjectConfig(BaseModel):
     """Configurações gerais do projeto (config.yaml)."""
 
@@ -57,6 +72,7 @@ class ProjectConfig(BaseModel):
     text_column: str = "review_text"
     sampling: SamplingConfig = SamplingConfig()
     split: SplitConfig = SplitConfig()
+    experiment: ExperimentConfig = ExperimentConfig()
 
 
 # --------------------------------------------------------------------------- #
@@ -153,7 +169,7 @@ class Settings(BaseSettings):
     model_params : ModelParamsConfig
         Hiperparâmetros dos modelos e da avaliação.
     mlflow_tracking_uri : str
-        URI do backend do MLflow (default: store local ``./mlruns``).
+        URI do backend do MLflow (default: SQLite ``sqlite:///mlruns/mlflow.db``).
     hf_token : str | None
         Token do Hugging Face (opcional; só para modelos privados).
     """
@@ -167,7 +183,7 @@ class Settings(BaseSettings):
 
     project: ProjectConfig
     model_params: ModelParamsConfig
-    mlflow_tracking_uri: str = "./mlruns"
+    mlflow_tracking_uri: str = "sqlite:///mlruns/mlflow.db"
     hf_token: str | None = None
 
 
@@ -212,4 +228,8 @@ def load_settings(
     """
     project = ProjectConfig(**_read_yaml(config_file))
     model_params = ModelParamsConfig(**_read_yaml(model_params_file))
-    return Settings(project=project, model_params=model_params)
+    settings = Settings(project=project, model_params=model_params)
+    # A URI do config.yaml vale, a menos que SENTIBENCH_MLFLOW_TRACKING_URI esteja definida.
+    if "mlflow_tracking_uri" not in settings.model_fields_set:
+        settings.mlflow_tracking_uri = project.experiment.tracking_uri
+    return settings

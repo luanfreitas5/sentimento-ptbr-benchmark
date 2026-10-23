@@ -61,9 +61,9 @@ def test_build_benchmark_summary_computes_gap(tmp_path: Path) -> None:
     """O resumo calcula o gap de generalização a partir do JSON salvo."""
     paths = ProjectPaths(
         root=tmp_path,
-        raw_dir=tmp_path / "raw",
-        interim_dir=tmp_path / "interim",
-        processed_dir=tmp_path / "processed",
+        bronze_dir=tmp_path / "bronze",
+        silver_dir=tmp_path / "silver",
+        gold_dir=tmp_path / "gold",
         models_dir=tmp_path / "models",
         reports_dir=tmp_path / "reports",
         figures_dir=tmp_path / "figures",

@@ -1,111 +1,123 @@
-# --- Configuração ----------------------------------------------------------
-PYTHON := python
+# =============================================================================
+# Makefile — atalhos reprodutíveis. `make check` replica o CI localmente.
+# =============================================================================
 UV := uv
 RUN := $(UV) run python src/main.py    # 'src' vira raiz do path ao rodar o script
 
 .DEFAULT_GOAL := help
-.PHONY: help init venv install install-all install-models hooks pre-commit update-hooks update lock export \
-	check format lint typecheck security deadcode complexity docstrings refurb quality \
-	test smoke hooks pre-commit update-hooks release docs docs-serve docs-deploy profile clean cache jupyter notebook add remove tree \
+.PHONY: help install install-bert install-all hooks update lock \
+	lint format typecheck security quality test smoke check pre-commit update-hooks release \
+	data prepare silver gold baseline bert benchmark evaluate train reproduce mlflow-ui \
 	clean-processed clean-reports clean-outputs clean-notebooks \
-	prepare baseline bert benchmark evaluate mlflow-ui
+	docs docs-serve docs-deploy profile clean
 
 help:  ## Lista os alvos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-init:  ## Inicializa o projeto (instala dependências + hooks)
-	$(MAKE) install
-	$(MAKE) hooks
+# --- Ambiente ---------------------------------------------------------------
+install:  ## Instala dependências (runtime + dev) e os hooks do pre-commit
+	$(UV) sync --locked
+	$(UV) run pre-commit install --hook-type pre-commit --hook-type commit-msg
 
-venv:  ## Cria o ambiente virtual (requer: uv)
-	$(UV) venv
+install-bert:  ## Instala o extra do BERTimbau (torch + transformers)
+	$(UV) sync --locked --extra bert
 
-install:  ## Instala dependências (runtime + dev)
-	$(UV) sync --dev
+install-all:  ## Instala todos os extras + grupos
+	$(UV) sync --locked --all-extras --all-groups
 
-install-all:  ## Instala tudo (todos os extras + dev)
-	$(UV) sync --all-extras --dev
+hooks:  ## Instala os hooks do pre-commit
+	$(UV) run pre-commit install --hook-type pre-commit --hook-type commit-msg
 
-install-models:  ## Instala os extras dos modelos Hugging Face (torch + transformers)
-	$(UV) sync --extra models --dev
-
-update:  ## Atualiza todas as dependências e sincroniza
+update:  ## Atualiza as dependências e regenera o uv.lock
 	$(UV) lock --upgrade
 	$(UV) sync --all-groups
 
-lock:
+lock:  ## Regenera o uv.lock
 	$(UV) lock
 
-export:
-	$(UV) export --no-hashes -o requirements.txt
+# --- Qualidade --------------------------------------------------------------
+lint:  ## Ruff: lint + verificação de formatação
+	$(UV) run ruff check src tests
+	$(UV) run ruff format --check src tests
 
-# --- Qualidade -------------------------------------------------------------
-check:  ## Checa formatação com ruff
-	$(UV) run ruff check .
+format:  ## Corrige lint e formata o código com ruff
+	$(UV) run ruff check --fix src tests
+	$(UV) run ruff format src tests
 
-format:  ## Formata o código com ruff
-	$(UV) run ruff format .
-
-lint: ## Lint com ruff
-	$(UV) run ruff check --fix .
-
-typecheck:  ## Type checking estático (basedPyright)
+typecheck:  ## Type checking estático (basedpyright)
 	$(UV) run basedpyright
 
-security:  ## Análise de segurança (bandit + pip-audit)
-	$(UV) run bandit -r src -c pyproject.toml
-	$(UV) run pip-audit
+security:  ## Segurança: bandit + pip-audit
+	$(UV) run bandit -c pyproject.toml -r src
+	$(UV) run pip-audit --ignore-vuln PYSEC-2026-2447  # diskcache (via dvc): sem versão corrigida
 
-deadcode:  ## Detecta código morto (vulture)
+quality:  ## Dead code, modernização, complexidade e docstrings
 	$(UV) run vulture src
-
-complexity:  ## Limites de complexidade (xenon)
+	$(UV) run refurb src
 	$(UV) run xenon --max-absolute B --max-modules A --max-average A src
-
-docstrings:  ## Cobertura de docstrings (interrogate)
 	$(UV) run interrogate -v src
 
-refurb:  ## Detecta código redundante (refurb)
-	$(UV) run refurb src
+test:  ## Testes com cobertura (>= 80%)
+	$(UV) run pytest -m "not slow" --cov-report=term-missing
 
-quality: format lint typecheck security deadcode complexity docstrings refurb   ## Roda toda a suíte de qualidade (espelha o CI)
-
-# --- Testes ----------------------------------------------------------------
-test:  ## Roda os testes com cobertura
-	$(UV) run pytest -m "not slow"
-
-smoke:  ## Roda apenas os smoke tests
+smoke:  ## Apenas os smoke tests (os mesmos do pre-commit)
 	$(UV) run pytest -m smoke -q --no-cov
 
-hooks:  ## Instala os hooks do pre-commit
-	$(UV) run pre-commit install
-	$(UV) run pre-commit install --hook-type commit-msg
-	$(UV) run detect-secrets scan > .secrets.baseline
+check: lint typecheck security quality test  ## Suíte completa (espelha o CI)
 
 pre-commit:  ## Roda todos os hooks do pre-commit em todos os arquivos
 	$(UV) run pre-commit run --all-files
 
-update-hooks:  ## Atualiza os hooks do pre-commit
+update-hooks:  ## Atualiza as revisões dos hooks do pre-commit
 	$(UV) run pre-commit autoupdate
 
 release:  ## Cria uma nova release (versão + changelog + tag)
-	$(UV) run cz changelog
 	$(UV) run cz bump --changelog --yes
 
+# --- Pipeline (bronze -> silver -> gold -> modelos -> relatórios) -----------
+# Pré-requisito: CSVs do Kaggle em data/bronze/ (ver data/README.md).
+silver:  ## bronze -> silver: limpa, valida (pandera) e grava parquet + manifest
+	$(RUN) bronze-to-silver
+
+gold:  ## silver -> gold: amostra estratificada e split treino/teste
+	$(RUN) silver-to-gold
+
+prepare data:  ## bronze -> silver -> gold
+	$(RUN) prepare
+
+baseline:  ## Treina o baseline TF-IDF + Regressão Logística em todos os domínios
+	$(RUN) train --model tfidf_logreg
+
+bert:  ## Fine-tuning do BERTimbau em todos os domínios (requer install-bert)
+	$(RUN) train --model bertimbau
+
+benchmark:  ## Benchmark cross-dataset completo (treina N x testa N)
+	$(RUN) benchmark
+
+evaluate:  ## Consolida métricas, significância e figuras
+	$(RUN) evaluate
+
+train: baseline  ## Alias do modelo base (TF-IDF + LogReg); use `make bert` para o BERTimbau
+
+reproduce: data benchmark evaluate  ## Reproduz todos os resultados de reports/
+
+mlflow-ui:  ## UI local do MLflow (backend SQLite)
+	$(UV) run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db
+
 # --- Limpeza de saídas do pipeline ------------------------------------------
-clean-processed:  ## Remove os artefatos de dados processados
-	rm -rf data/processed/*.parquet
+clean-processed:  ## Remove os artefatos das camadas silver e gold
+	rm -rf data/silver/*.parquet data/silver/manifest.json data/gold/*/*.parquet data/gold/manifest.json
 
 clean-reports:  ## Remove os relatórios gerados (pastas por modelo + comparação)
 	find reports -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
 clean-outputs: clean-processed clean-reports  ## Remove todas as saídas do pipeline
 
-clean-notebooks:  ## Remove os notebooks com células vazias
-	$(UV) run nbstripout notebooks
+clean-notebooks:  ## Remove as saídas dos notebooks (nbstripout)
+	$(UV) run nbstripout notebooks/*.ipynb
 
-# --- Documentação ----------------------------------------------------------
+# --- Documentação -----------------------------------------------------------
 docs:  ## Constrói a documentação (modo estrito)
 	$(UV) run mkdocs build --strict
 
@@ -115,49 +127,10 @@ docs-serve:  ## Servidor local da documentação
 docs-deploy:  ## Publica a documentação no GitHub Pages
 	$(UV) run mkdocs gh-deploy --force
 
-# --- Utilitários -----------------------------------------------------------
-profile:  ## Exemplo de profiling com scalene (ajuste o alvo)
+# --- Utilitários ------------------------------------------------------------
+profile:  ## Profiling com scalene (ajuste o alvo)
 	$(UV) run scalene src/main.py
 
 clean:  ## Remove caches e artefatos temporários
-	rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov coverage.xml site
+	rm -rf .pytest_cache .ruff_cache .coverage htmlcov coverage.xml site
 	find . -type d -name __pycache__ -exec rm -rf {} +
-
-cache:
-	$(UV) cache clean
-
-# --- Jupyter ----------------------------------------------------------------
-jupyter:
-	$(UV) run jupyter lab
-
-notebook:
-	$(UV) run jupyter notebook
-
-# --- Gerenciamento de pacotes -----------------------------------------------
-add:
-	$(UV) add $(PKG)
-
-remove:
-	$(UV) remove $(PKG)
-
-tree:
-	$(UV) tree
-
-# --- Pipeline do benchmark -------------------------------------------------
-prepare:  ## Limpa, valida e amostra os corpora (raw -> processed)
-	$(RUN) prepare
-
-baseline:  ## Treina o baseline TF-IDF + Regressão Logística em todos os domínios
-	$(RUN) train --model tfidf_logreg
-
-bert:  ## Faz fine-tuning do BERTimbau em todos os domínios (requer extra bert)
-	$(RUN) train --model bertimbau
-
-benchmark:  ## Roda o benchmark cross-dataset completo (treina N x testa N)
-	$(RUN) benchmark
-
-evaluate:  ## Consolida métricas, testes de significância e figuras
-	$(RUN) evaluate
-
-mlflow-ui:  ## Sobe a UI local do MLflow
-	$(UV) run mlflow ui --backend-store-uri ./mlruns

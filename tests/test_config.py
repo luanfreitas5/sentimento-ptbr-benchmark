@@ -33,8 +33,8 @@ def test_invalid_logreg_param_raises() -> None:
 def test_paths_resolve_under_root() -> None:
     """Os caminhos derivados ficam sob a raiz do projeto."""
     paths = get_paths()
-    assert paths.raw_dir.is_relative_to(paths.root)
-    assert paths.raw_dataset("b2w").name == "b2w.csv"
+    assert paths.bronze_dir.is_relative_to(paths.root)
+    assert paths.bronze_dataset("b2w").name == "b2w.csv"
 
 
 def test_seed_everything_is_reproducible() -> None:

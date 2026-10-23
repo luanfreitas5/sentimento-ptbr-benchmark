@@ -14,7 +14,6 @@ build/
 dist/
 *.egg-info/
 .eggs/
-.Python
 
 # --- Ambientes / uv --------------------------------------------------------
 .venv/
@@ -26,14 +25,12 @@ env/
 .env
 .env.*
 !.env.example
-.secrets.baseline.local
 # .secrets.baseline é commitado (usado pelo detect-secrets) — não ignorar.
 
 # --- Dados (versionados por DVC) -------------------------------------------
-data/raw/*
-data/external/*
-data/interim/*
-data/processed/*
+data/bronze/*
+data/silver/*
+data/gold/*
 # Mantém a estrutura de pastas e os ponteiros do DVC:
 !data/**/.gitkeep
 !data/**/*.dvc
@@ -41,7 +38,6 @@ data/processed/*
 # --- Modelos / experimentos ------------------------------------------------
 models/*
 !models/**/.gitkeep
-!models/.gitkeep
 !models/**/*.dvc
 mlruns/
 mlartifacts/
@@ -55,12 +51,12 @@ mlartifacts/
 /.dvc/cache
 /.dvc/tmp
 /.dvc/plots
+/.dvc/config.local
 # .dvc/config e os arquivos *.dvc são commitados.
 
 # --- Logs ------------------------------------------------------------------
-logs/*
+logs/
 *.log
-!logs/.gitkeep
 
 # --- Testes / cobertura / lint ---------------------------------------------
 .pytest_cache/
@@ -77,11 +73,6 @@ site/
 
 # --- Notebooks -------------------------------------------------------------
 .ipynb_checkpoints/
-
-# --- Relatórios gerados (mantém apenas templates versionados) ---------------
-reports/figures/*
-reports/metrics/*
-!reports/**/.gitkeep
 
 # --- Profiling -------------------------------------------------------------
 *.speedscope
@@ -106,3 +97,9 @@ CLAUDE.md
 CLAUDE.local.md
 .claude/
 .mcp.json
+
+# --- Opcional: descomente para ignorar dados soltos por extensão -----------
+# *.csv
+# *.parquet
+# *.xlsx
+# *.feather

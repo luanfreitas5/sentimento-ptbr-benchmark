@@ -35,9 +35,9 @@ def _build_paths(tmp_path: Path) -> ProjectPaths:
     """ProjectPaths inteiramente sob um diretório temporário."""
     return ProjectPaths(
         root=tmp_path,
-        raw_dir=tmp_path / "raw",
-        interim_dir=tmp_path / "interim",
-        processed_dir=tmp_path / "processed",
+        bronze_dir=tmp_path / "bronze",
+        silver_dir=tmp_path / "silver",
+        gold_dir=tmp_path / "gold",
         models_dir=tmp_path / "models",
         reports_dir=tmp_path / "reports",
         figures_dir=tmp_path / "figures",
@@ -64,9 +64,9 @@ def _build_settings() -> Settings:
     )
 
 
-def _write_raw(paths: ProjectPaths) -> None:
-    """Escreve CSVs brutos sintéticos com sinal claro para os dois domínios."""
-    paths.raw_dir.mkdir(parents=True, exist_ok=True)
+def _write_bronze(paths: ProjectPaths) -> None:
+    """Escreve CSVs bronze sintéticos com sinal claro para os dois domínios."""
+    paths.bronze_dir.mkdir(parents=True, exist_ok=True)
     positives = [
         "produto excelente adorei recomendo muito bom",
         "ótima qualidade entrega rápida perfeito top",
@@ -86,7 +86,7 @@ def _write_raw(paths: ProjectPaths) -> None:
                 "polarity": [float(v) for v in labels],
                 "rating": [5.0 if v else 1.0 for v in labels],
             }
-        ).write_csv(paths.raw_dataset(domain))
+        ).write_csv(paths.bronze_dataset(domain))
 
 
 @pytest.mark.integration
@@ -94,11 +94,17 @@ def test_end_to_end_baseline_benchmark(tmp_path: Path) -> None:
     """Prepara os corpora e roda o benchmark cross-dataset do baseline."""
     paths = _build_paths(tmp_path)
     settings = _build_settings()
-    _write_raw(paths)
+    _write_bronze(paths)
 
     manifest = run_preparation(domains=_DOMAINS, settings=settings, paths=paths)
     assert set(manifest) == set(_DOMAINS)
-    assert paths.processed_split("b2w", "train").exists()
+    assert paths.silver_dataset("b2w").exists()
+    assert paths.gold_split("b2w", "train").exists()
+    assert (paths.bronze_dir / "manifest.json").exists()
+    silver_manifest = read_json(paths.silver_dir / "manifest.json")
+    assert set(silver_manifest) == set(_DOMAINS)
+    assert all(len(entry["sha256"]) == 64 for entry in silver_manifest.values())
+    assert set(read_json(paths.gold_dir / "manifest.json")["bronze_sha256"]) == set(_DOMAINS)
 
     results = run_benchmark(
         ["tfidf_logreg"],

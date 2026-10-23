@@ -1,8 +1,8 @@
-"""Carregamento e preparação dos corpora brutos de sentimento.
+"""Carregamento e preparação dos corpora de sentimento (bronze -> silver).
 
-Lê os CSVs com polars (lazy), seleciona as colunas essenciais, valida o
-contrato bruto, remove nulos/duplicatas, aplica a limpeza de texto e devolve um
-DataFrame já anotado com o domínio de origem.
+Lê os CSVs bronze com polars (lazy), seleciona as colunas essenciais, valida o
+contrato bronze, remove nulos/duplicatas, aplica a limpeza de texto e devolve um
+DataFrame (camada silver) já anotado com o domínio de origem.
 """
 
 from __future__ import annotations
@@ -20,8 +20,8 @@ from src.schemas.dataset import validate_raw
 logger = logging.getLogger(__name__)
 
 
-def load_raw_domain(domain: str, paths: ProjectPaths | None = None) -> pl.DataFrame:
-    """Carrega o CSV bruto de um domínio e valida o contrato mínimo.
+def load_bronze_domain(domain: str, paths: ProjectPaths | None = None) -> pl.DataFrame:
+    """Carrega o CSV bronze de um domínio e valida o contrato mínimo.
 
     Parameters
     ----------
@@ -38,21 +38,21 @@ def load_raw_domain(domain: str, paths: ProjectPaths | None = None) -> pl.DataFr
     Raises
     ------
     DatasetNotFoundError
-        Se o CSV do domínio não existir em ``data/raw``.
+        Se o CSV do domínio não existir em ``data/bronze``.
 
     Examples
     --------
-    >>> df = load_raw_domain("b2w")  # doctest: +SKIP
+    >>> df = load_bronze_domain("b2w")  # doctest: +SKIP
     """
     paths = paths or get_paths()
-    csv_path = paths.raw_dataset(domain)
+    csv_path = paths.bronze_dataset(domain)
     if not csv_path.exists():
         raise DatasetNotFoundError(
             f"Corpus '{domain}' não encontrado em {csv_path}. "
-            "Baixe o dataset do Kaggle para data/raw/."
+            "Baixe o dataset do Kaggle para data/bronze/."
         )
 
-    logger.info("Carregando corpus bruto '%s' de %s", domain, csv_path.name)
+    logger.info("Carregando corpus bronze '%s' de %s", domain, csv_path.name)
     lazy = pl.scan_csv(csv_path, infer_schema_length=10_000).select(
         pl.col(RawColumns.REVIEW_TEXT).cast(pl.Utf8, strict=False),
         pl.col(RawColumns.POLARITY).cast(pl.Float64, strict=False),
@@ -88,9 +88,8 @@ def prepare_domain(
     --------
     >>> df = prepare_domain("olist")  # doctest: +SKIP
     """
-
     prepared = (
-        load_raw_domain(domain, paths=paths)
+        load_bronze_domain(domain, paths=paths)
         .drop_nulls([RawColumns.REVIEW_TEXT, RawColumns.POLARITY, RawColumns.RATING])
         .with_columns(
             pl.col(RawColumns.REVIEW_TEXT)

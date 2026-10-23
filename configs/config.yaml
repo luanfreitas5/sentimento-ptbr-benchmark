@@ -32,3 +32,9 @@ sampling:
 split:
   test_size: 0.2
   stratify: true
+
+# Rastreamento de experimentos (MLflow). Sempre um banco (SQLite), nunca o file
+# store ./mlruns. SENTIBENCH_MLFLOW_TRACKING_URI no .env sobrescreve tracking_uri.
+experiment:
+  tracking_uri: sqlite:///mlruns/mlflow.db
+  registry_uri: sqlite:///mlruns/mlflow.db
