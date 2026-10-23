@@ -1,4 +1,4 @@
-# BERTimbau eleva o F1-macro de sentimento em PT-BR de 0,843 para 0,890 — e reduz a perda fora do domínio
+# Benchmark de Análise de Sentimento em PT-BR: BERTimbau eleva o F1-macro de sentimento em PT-BR de 0,843 para 0,890 — e reduz a perda fora do domínio
 
 [![CI](https://github.com/luanfreitas5/sentimento-ptbr-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/luanfreitas5/sentimento-ptbr-benchmark/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/luanfreitas5/sentimento-ptbr-benchmark/graph/badge.svg)](https://codecov.io/gh/luanfreitas5/sentimento-ptbr-benchmark)
