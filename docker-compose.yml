@@ -1,0 +1,69 @@
+# Benchmark (job em lote) + UI do MLflow, ambos com backend SQLite em ./mlruns.
+# SQLite basta para uso local de uma pessoa; se o tracking for compartilhado,
+# migre para MLflow server + Postgres. Segredos opcionais vêm do .env (nunca commitado).
+# `docker compose config -q` valida o arquivo.
+#
+# Uso:
+#   docker compose build
+#   docker compose run --rm sentibench prepare
+#   docker compose run --rm sentibench benchmark
+#   docker compose up mlflow-ui        # http://localhost:5000
+services:
+  sentibench:
+    build:
+      context: .
+      args:
+        # Para o BERTimbau: UV_EXTRAS="--extra bert" docker compose build
+        UV_EXTRAS: ${UV_EXTRAS:-}
+    image: sentimento-ptbr-benchmark:${IMAGE_VERSION:-dev}
+    profiles: ["job"] # não sobe com `docker compose up`; use `docker compose run`
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      SENTIBENCH_MLFLOW_TRACKING_URI: sqlite:///mlruns/mlflow.db
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+      - ./mlruns:/app/mlruns
+      - hf-cache:/cache/hf # modelos do Hugging Face baixados uma única vez
+    read_only: true # sistema de arquivos imutável; só os volumes acima e tmpfs são graváveis
+    tmpfs:
+      - /tmp
+      - /cache/mpl:uid=10001,gid=10001
+    # Descomente para treinar o BERTimbau com GPU NVIDIA (requer nvidia-container-toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  mlflow-ui:
+    image: sentimento-ptbr-benchmark:${IMAGE_VERSION:-dev}
+    entrypoint: ["mlflow"]
+    command:
+      - ui
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=sqlite:///mlruns/mlflow.db
+    volumes:
+      - ./mlruns:/app/mlruns
+    ports:
+      - "127.0.0.1:5000:5000" # só na máquina local; o MLflow não tem autenticação
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  hf-cache:

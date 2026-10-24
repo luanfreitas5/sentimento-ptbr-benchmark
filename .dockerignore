@@ -1,0 +1,11 @@
+# Lista de permissão: ignora tudo e libera só o que a imagem precisa.
+# Assim .venv (do host), .env, data/, models/, mlruns/, reports/ e .git nunca entram no contexto.
+*
+!pyproject.toml
+!uv.lock
+!src/
+!configs/
+
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache

@@ -3,13 +3,14 @@
 # =============================================================================
 UV := uv
 RUN := $(UV) run python src/main.py    # 'src' vira raiz do path ao rodar o script
+DOCKER_RUN := docker compose run --rm sentibench
 
 .DEFAULT_GOAL := help
 .PHONY: help install install-bert install-all hooks update lock \
 	lint format typecheck security quality test smoke check pre-commit update-hooks release \
 	data prepare silver gold baseline bert benchmark evaluate train reproduce mlflow-ui \
 	clean-processed clean-reports clean-outputs clean-notebooks \
-	docs docs-serve docs-deploy profile clean
+	docker-build docker-build-bert docker-prepare docker-benchmark docker-evaluate docker-mlflow-ui docker-lint \n	docs docs-serve docs-deploy profile clean
 
 help:  ## Lista os alvos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -104,6 +105,29 @@ reproduce: data benchmark evaluate  ## Reproduz todos os resultados de reports/
 
 mlflow-ui:  ## UI local do MLflow (backend SQLite)
 	$(UV) run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db
+
+# --- Docker (imagem = código + uv.lock; dados/modelos/mlruns via volumes) ---
+docker-build:  ## Constrói a imagem (baseline TF-IDF + LogReg, CPU)
+	docker compose build sentibench
+
+docker-build-bert:  ## Constrói a imagem com o extra do BERTimbau (torch + transformers)
+	UV_EXTRAS="--extra bert" docker compose build sentibench
+
+docker-prepare:  ## Container: bronze -> silver -> gold
+	$(DOCKER_RUN) prepare
+
+docker-benchmark:  ## Container: benchmark cross-dataset completo
+	$(DOCKER_RUN) benchmark
+
+docker-evaluate:  ## Container: consolida métricas, significância e figuras
+	$(DOCKER_RUN) evaluate
+
+docker-mlflow-ui:  ## UI do MLflow em http://localhost:5000 (container)
+	docker compose up mlflow-ui
+
+docker-lint:  ## Valida o compose e o Dockerfile (hadolint)
+	docker compose config -q
+	hadolint Dockerfile
 
 # --- Limpeza de saídas do pipeline ------------------------------------------
 clean-processed:  ## Remove os artefatos das camadas silver e gold
