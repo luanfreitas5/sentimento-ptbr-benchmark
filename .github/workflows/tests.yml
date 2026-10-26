@@ -48,9 +48,14 @@ jobs:
       # cobertura, derrubando o total para ~73% (< fail_under = 80).
       # PyTorch entra na build CPU (o índice cu124 do pyproject traria ~2 GB de
       # CUDA, inútil em runners sem GPU). Versões espelham o extra `hypothesaes`.
+      # `--index-url` sozinho substitui o PyPI: o índice do PyTorch só tem
+      # setuptools<=78.1 (torch recente exige >=83) e não tem wheels cp313/cp314
+      # no Linux/macOS. O PyPI entra como índice extra, e `unsafe-best-match`
+      # deixa o uv escolher o melhor candidato entre os dois índices (o build
+      # `+cpu` vence o CUDA do PyPI na mesma versão).
       - name: Instalar extras opcionais dos testes (PyTorch CPU + clientes LLM)
         run: |
-          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple --index-strategy unsafe-best-match
           uv pip install "openai>=3.8.0" "tiktoken>=0.14.0" "ollama>=0.3"
 
       # No macOS o XGBoost usa o libomp do Homebrew e o PyTorch traz o seu
