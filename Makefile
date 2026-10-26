@@ -29,6 +29,7 @@ install-all:  ## Instala todos os extras + grupos
 
 hooks:  ## Instala os hooks do pre-commit
 	$(UV) run pre-commit install --hook-type pre-commit --hook-type commit-msg
+	$(UV) run detect-secrets scan > .secrets.baseline
 
 update:  ## Atualiza as dependências e regenera o uv.lock
 	$(UV) lock --upgrade

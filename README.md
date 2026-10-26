@@ -8,6 +8,8 @@
 
 > **Resultado:** o BERTimbau fine-tuned atinge F1-macro in-domain médio = **0,890** contra **0,843** do baseline TF-IDF + Regressão Logística (5 corpora de ~4.000 reviews de teste cada; IC 95% por bootstrap em cada domínio, tabela abaixo). Fora do domínio a média cai para **0,796** (BERTimbau) e **0,722** (baseline): o gap de generalização é de 0,095 vs. 0,121. Ou seja, o transformer compensa o custo, mas **nenhum dos dois modelos é confiável em filmes quando treinado em outro domínio**.
 
+![Benchmark de Sentimento em PT-BR](banner/sentimento.png)
+
 ## 🎯 Problema
 
 - **Quem decide o quê:** pesquisadores/engenheiros de NLP escolhem entre um baseline barato (CPU, segundos) e um fine-tuning de BERT (GPU, minutos) para classificar a polaridade de avaliações em português brasileiro, e precisam saber se o modelo treinado em um domínio serve em outro.
